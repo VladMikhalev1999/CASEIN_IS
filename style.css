@@ -17,3 +17,7 @@ h1 {
 .clearfix {
     clear: both;
 }
+
+body {
+color: #3a6073;    
+}

@@ -9,7 +9,7 @@
 <?php
     require "script.php";
     $db = auth($_COOKIE["login"], $_COOKIE["password"]);
-    $query = "select * from machines";
+    $query = "select * from all_machin()";
     $result = pg_query($db, $query);
     $result = pg_fetch_all($result);
 ?>
@@ -68,31 +68,32 @@ h2 {
         inset -285px 0 35px white;
     border-radius: 0 10px 0 10px;
 }
+.cont {
+font-size: 20pt;
+margin: 10% auto 0 auto;
+text-align: center;
+}
 </style>
     <div class="clearfix">
         <form style="float:right;margin-right:10px;margin-top:5px;" action="index.php" method="post">
         <input type="submit" name="logout" value="Выйти из системы" class="btn btn-mini btn-danger" />
-        </form><button style="float:left;margin-left:10px;margin-top:5px;" class="btn btn-primary" onclick="document.location.replace('auth.php')">Назад</button>
+        </form>
+        <button style="float:left;margin-left:10px;margin-top:5px;" class="btn btn-primary" onclick="document.location.replace('jz_nachalnik_uchastka.php')">Назад</button>
     </div>
-<h1>Станки</h1>
-<table class="table table-bordered table-striped mb-0" border="1">
-<tr>
-    <th>№</th>
-    <th>Модель</th>
-    <th>Возраст</th>
-</tr>
+<h1>Формирование заявки</h1>
+<div class="cont">
+<form  action="jz_nachalnik_uchastka.php" method="get">
+<p><i>Выберите станок:</i></p>
+<select style="width:250px" name="machines">
 <?php
-    if (is_array($result)) { 
     for ($i = 0; $i < count($result); $i++) {
-        $row = $result[$i];
-        echo '<tr>';
-        echo "<td>" . $row['id'] . "</td>";
-        echo "<td>" . $row['model'] . "</td>";
-        echo "<td>" . $row['age'] . "</td>";
-        echo "</tr>";
-    }
+        echo "<option>" . $result[$i]["id"] . "." . $result[$i]["model"] . "</option>";
     }
 ?>
-</table>
+</select>
+<p></p>
+<input class="btn btn-primary" type="submit" value="Сформировать" />
+</form>
+</div>
 </body>
 </html>

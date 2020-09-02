@@ -9,20 +9,12 @@
 <?php
     require "script.php";
     $db = auth($_COOKIE["login"], $_COOKIE["password"]);
-    $query = "select * from machines";
+    $query = "select * from servis";
     $result = pg_query($db, $query);
     $result = pg_fetch_all($result);
 ?>
 <body>
 <style>
-table {width:100%; text-align: center; border-bottom: 2px solid #dfdfdf; border-radius: 6px; border-collapse: separate; border-spacing: 0px;}
-table tr th {color: #ffffff; font-weight: bold; background: #828282; text-align: center;}
-table tr td, table tr th {border-right: 1px solid #dfdfdf; padding: 10px;}
-table tr td { font-style: italic; }
-table tr td:last-child {border-right: 0px;}
-table tr:nth-child(1n) {background: #e6e6e6;}
-table tr:nth-child(2n) {background: #f6f6f6;}
-table tr:hover {background: #000000; color:white; transition-duration: 0.6s;}
 body {
 background: #3a7bd5;
 background: -webkit-linear-gradient(to top, #3a6073, #3a7bd5);
@@ -72,27 +64,27 @@ h2 {
     <div class="clearfix">
         <form style="float:right;margin-right:10px;margin-top:5px;" action="index.php" method="post">
         <input type="submit" name="logout" value="Выйти из системы" class="btn btn-mini btn-danger" />
-        </form><button style="float:left;margin-left:10px;margin-top:5px;" class="btn btn-primary" onclick="document.location.replace('auth.php')">Назад</button>
+        </form>
+        <button style="float:left;margin-left:10px;margin-top:5px;" class="btn btn-primary" onclick="document.location.replace('employees.php')">Назад</button>
     </div>
-<h1>Станки</h1>
-<table class="table table-bordered table-striped mb-0" border="1">
-<tr>
-    <th>№</th>
-    <th>Модель</th>
-    <th>Возраст</th>
-</tr>
+<h1>Справка о сервисе</h1>
 <?php
-    if (is_array($result)) { 
-    for ($i = 0; $i < count($result); $i++) {
-        $row = $result[$i];
-        echo '<tr>';
-        echo "<td>" . $row['id'] . "</td>";
-        echo "<td>" . $row['model'] . "</td>";
-        echo "<td>" . $row['age'] . "</td>";
-        echo "</tr>";
+    $servis = null;
+    $i = 0;
+    $mark = TRUE;
+    while ($mark) {
+        for ($j = 0; $j < count($result); $j++) {
+            if ($result[$j]["id"] == $_REQUEST["id"]) {
+                $servis = $result[$j]["note"];
+                $mark = FALSE;
+            }
+        }
+        $i++;
+        if ($i >= 1000000) $mark = FALSE;
     }
+    if ($servis != null) {
+        echo "<h3 style=\"margin-top:7%;text-align:center; font-family: SansSerif; font-size: 20pt\"><span style=\"background-color:white;border: 4px solid #3a6073;padding:10px;border-radius:10px;\"><i>" . $servis . "</i></span></h3>";
     }
 ?>
-</table>
 </body>
 </html>

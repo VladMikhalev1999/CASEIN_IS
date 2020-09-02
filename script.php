@@ -9,7 +9,7 @@
         global $hostname, $port, $dbname, $user, $password;
         $hostname = $hostname . '192.168.0.108';
         $port = $port . '5432';
-        $dbname = $dbname . 'CASE_IN';
+        $dbname = $dbname . 'CASE__IN';
         $user = $user . $login;
         $password = $password . $pass;
         $str = $hostname . ' ' . $port . ' ' . $dbname . ' ' . $user . ' ' . $password;
@@ -19,5 +19,10 @@
     function db_access($connect_str) {
         $db = pg_pconnect($connect_str);
         return $db;
+    }
+    function nulify_cookie() {
+        setcookie("login", "", time() - 3600);
+        setcookie("password", "", time() - 3600);
+        unset($_COOKIE);
     }
 ?>

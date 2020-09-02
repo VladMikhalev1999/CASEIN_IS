@@ -1,30 +1,127 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>IS</title>
+<title>ИС ТОиР</title>
 <script src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css" >
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 <?php
     require "script.php";
-    $db = auth();
-    $query = "select * from jurnal_zayavok_nach_sluj()";
+    $db = auth($_COOKIE["login"], $_COOKIE["password"]);
+    if (isset($_REQUEST["exes"])) {
+        $query = "select * from form_brigada_1(" . explode(".", $_REQUEST["id_zayvki"])[0] . "," . explode(".", $_REQUEST["snames"])[0] . "," . explode(".", $_REQUEST["exes"])[0] . ")";
+        $result = pg_query($db, $query);
+        $result = pg_fetch_all($result);
+    }
+    if (isset($_REQUEST["id"]) && isset($_REQUEST["state"])) {
+        $query = "select * from proveril(" . $_REQUEST["id"] . ")";
+        $result = pg_query($db, $query);
+        $result = pg_fetch_all($result);
+    }    
+    $query = "select * from jurnal_zayavok_nach_sluj_1()";
     $result = pg_query($db, $query);
     $result = pg_fetch_all($result);
 ?>
 <body>
+<style>
+table {width:100%; text-align: center; border-bottom: 2px solid #dfdfdf; border-radius: 6px; border-collapse: separate; border-spacing: 0px;}
+table tr th {color: #ffffff; font-weight: bold; background: #828282; text-align: center;}
+table tr td, table tr th {border-right: 1px solid #dfdfdf; padding: 10px;}
+table tr td { font-style: italic; }
+table tr td:last-child {border-right: 0px;}
+table tr:nth-child(1n) {background: #e6e6e6;}
+table tr:nth-child(2n) {background: #f6f6f6;}
+table tr:hover {background: #000000; color:white; transition-duration: 0.6s;}
+body {
+background: #3a7bd5;
+background: -webkit-linear-gradient(to top, #3a6073, #3a7bd5);
+background: linear-gradient(to top, #3a6073, #3a7bd5);
+background-image: url("img/bg_network.png");
+background-size: 100% auto;
+background-position: center;
+background-attachment: fixed;
+}
+h1 {
+    width: 50%;
+    font-weight: 600;
+    font-family: 'Titillium Web', sans-serif;
+    position: relative; 
+    font-size: 36px;
+    line-height: 40px;
+    padding: 15px 15px 15px 0;
+    margin-left: 25%;
+    color: #828282;
+    background-color: white;
+    box-shadow:
+        inset 0 0 0 1px #828282,
+        inset 0 0 5px rgba(53,86,129, 0.5),
+        inset -285px 0 35px white;
+    border-radius: 0 10px 0 10px;
+}
+h2 {
+    width: 20%;
+    text-align: center;
+    background-color: white;
+    margin: 1em 0 .6em 0;
+    margin-left: 5px;
+    font-weight: normal;
+    color: #828282;
+    font-family: 'Hammersmith One', sans-serif;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+    position: relative;
+    font-size: 30px;
+    line-height: 40px;
+    box-shadow:
+        inset 0 0 0 1px #828282,
+        inset 0 0 5px rgba(53,86,129, 0.5),
+        inset -285px 0 35px white;
+    border-radius: 0 10px 0 10px;
+}
+</style>
+    <div class="clearfix">
+        <form style="float:right;margin-right:10px;margin-top:5px;" action="index.php" method="post">
+        <input type="submit" name="logout" value="Выйти из системы" class="btn btn-mini btn-danger" />
+        </form><button style="float:left;margin-left:10px;margin-top:5px;" class="btn btn-primary" onclick="document.location.replace('auth.php')">Назад</button>
+    </div>
 <h1>Журнал заявок</h1>
 <h2>Фильтр заявок</h2>
-<button class="btn btn-primary">Выполнил</button>
+<button class="btn btn-primary" onclick="show_only_done()">Выполненные заявки</button>
+<button class="btn btn-primary" onclick="show_all()">Все заявки</button>
+<script>
+    function show_all() {
+        let table = document.getElementById("for_brigadir");
+        table = table.getElementsByTagName("tbody")[0];
+        table = table.children;
+        for (let i = 1; i < table.length; i++) {
+            table[i].style.display = "";
+        }
+    }
+    function show_only_done() {
+        show_all();
+        let table = document.getElementById("for_brigadir");
+        table = table.getElementsByTagName("tbody")[0];
+        table = table.children;
+        for (let i = 1; i < table.length; i++) {
+            let tr = table[i];
+            if (tr.childNodes[4].innerText != "Выполнена") {
+                tr.style.display = "none";
+            }
+        }
+    }
+</script>
 <p></p>
-<a class="btn btn-info" href="create_brigada.php">Сформировать бригаду</a>
+<form name="create_brigada" action="create_brigada.php" action="get">
+    <input type="submit" class="btn btn-primary" value="Сформировать бригаду" onclick="handler(document.forms.create_brigada, 1)" />
+</form>
 <p></p>
-<button class="btn btn-success">Проверил</button>
+<form name="proveril" action="jz_nachalnik_brigady.php" method="post">
+    <input type="submit" class="btn btn-success" value="Проверил" onclick="handler(form, 5)"/>
+</form>
 <p></p>
-<table class="table" border="1">
+<table id="for_brigadir" class="table" border="1">
 <tr>
-    <th>№</th>
+    <th>№ заявки</th>
     <th>Станок</th>
     <th>Проблемный узел</th>
     <th>Вид заявки</th>
@@ -41,13 +138,56 @@
         echo "<td>" . $row['model'] . "</td>";
         echo "<td>" . $row['nameuzel'] . "</td>";
         echo "<td>" . $row['namevid'] . "</td>";
-        echo "<td>" . $row['state'] . "</td>";
-        echo "<td>" . $row['idbrigada'] . "</td>";
+        if ($row['state'] == "1") echo "<td>Рассматривается</td>";
+        if ($row['state'] == "2") echo "<td>Ожидает выполнения</td>";
+        if ($row['state'] == "3") echo "<td>Выполняется</td>";
+        if ($row['state'] == "4") echo "<td>Выполнена</td>";
+        if ($row['state'] == "5") echo "<td>Утверждена</td>";
+        if($row['idbrigada'] != "0") echo "<td>" . $row['idbrigada'] . "</td>";
+        else echo "<td></td>";
         echo "<td>" . $row['date_postuplenya'] . "</td>";
         echo "</tr>";
     }
     }
 ?>
 </table>
+<script>
+    function handler(form, id) {
+        if (chosenRow == null) return;
+        let x = document.createElement("input");
+        x.setAttribute("type", "hidden");
+        x.setAttribute("name", "id");
+        x.setAttribute("value", chosenRow.children[0].innerText);
+        form.appendChild(x);
+        x = document.createElement("input");
+        x.setAttribute("type", "hidden");
+        x.setAttribute("name", "state");
+        x.setAttribute("value", id);
+        form.appendChild(x);
+    }
+    let form = document.forms.proveril;
+    let chosenRow = null;
+    let rows = document.getElementsByTagName("table")[0].getElementsByTagName("tbody")[0].children;
+    for (let i = 1; i < rows.length; i++) {
+        let row = rows[i];
+        row.addEventListener("click", (event) => {
+            if (chosenRow == null) {
+                chosenRow = event.target.parentNode;
+                chosenRow.style.backgroundColor = "black";
+                chosenRow.style.color = "white";
+            } else if (chosenRow == event.target.parentNode) {
+                chosenRow.style.backgroundColor = "white";
+                chosenRow.style.color = "black";
+                chosenRow = null;                
+            } else {
+                chosenRow.style.backgroundColor = "white";
+                chosenRow.style.color = "black";
+                chosenRow = event.target.parentNode;
+                chosenRow.style.backgroundColor = "black";
+                chosenRow.style.color = "white";
+            }
+        });
+    }
+</script>
 </body>
 </html>
